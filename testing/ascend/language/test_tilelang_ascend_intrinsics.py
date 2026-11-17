@@ -465,3 +465,19 @@ def test_ascend_simd_vsts_extent_override():
     (store,) = calls(func, "tl.simd.vsts")
     assert int(store.args[0].args[1]) == 8
     assert int(store.args[0].args[2]) == 2
+
+
+def test_manual_pipe_barrier_codegen():
+    @T.prim_func
+    def kernel(A: T.Tensor((1,), "float32")):
+        with T.Kernel(1):
+            T.ascend_pipe_barrier("PIPE_V")
+            T.ascend_pipe_barrier("PIPE_ALL")
+            T.ascend_pipe_barrier("PIPE_S")
+            T.ascend_pipe_barrier("PIPE_MTE2")
+            A[0] = T.float32(1)
+
+    source = lower(kernel, target="ascend").kernel_source
+    assert source.count("asc_sync();") == 2
+    assert "asc_sync_pipe(PIPE_MTE2)" in source
+    assert "asc_sync_pipe(PIPE_V)" not in source

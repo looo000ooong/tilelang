@@ -199,6 +199,29 @@ def test_single_trip_loop_keeps_forward_handshake():
     assert not _events(after, "wait", "MTE3_MTE2")
 
 
+# --- 85F: scalar-only per-core candidates need no synchronization ---
+
+
+def test_scalar_only_per_core_candidates_need_no_sync():
+    sid = tirx.Var("sid", "int32")
+    cells = [tirx.decl_buffer((1,), "float32", name=f"cell{index}", scope="local.var") for index in range(2)]
+    candidates = seq(
+        *[
+            tirx.IfThenElse(
+                sid == index,
+                unit(tirx.BufferStore(cells[index], tirx.const(index, "float32"), [0]), core=0).body,
+                None,
+            )
+            for index in range(2)
+        ]
+    )
+    group = tirx.AttrStmt({"core_mask": 2}, "tl.ascend_per_core_task", 1, candidates)
+    before = kernel(seq(unit(group, core=None)), buffers=cells, params=[sid])
+    after = transform.InsertSync()(before)
+    assert not calls(after, "tl.ascend_set_flag")
+    assert not calls(after, "tl.ascend_wait_flag")
+
+
 # --- 101F: an absent unit_flag_ctrl annotation is treated as zero ---
 
 
