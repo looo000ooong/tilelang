@@ -1,0 +1,6 @@
+"""L3 100: 关闭自动调度.
+
+代表用例：testing.ascend.auto_schedule.test_schedule_integration::test_unscheduled_pipeline_rejects_placement_instead_of_dropping_it
+"""
+
+from testing.ascend.auto_schedule.test_schedule_integration import test_unscheduled_pipeline_rejects_placement_instead_of_dropping_it as test_case

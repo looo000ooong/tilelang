@@ -1,0 +1,6 @@
+"""L3 94: 共享通道与版本数优化.
+
+代表用例：testing.ascend.auto_schedule.test_sync_spec_gaps::test_three_slot_declaration_with_reverse_distance_one_collapses_to_one_id
+"""
+
+from testing.ascend.auto_schedule.test_sync_spec_gaps import test_three_slot_declaration_with_reverse_distance_one_collapses_to_one_id as test_case
